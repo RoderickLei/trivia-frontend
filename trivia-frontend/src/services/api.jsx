@@ -26,11 +26,17 @@ async function getQuestions() {
   return request("GET", "questions");
 }
 
-async function checkAnswer(questionId, selectedAnswer) {
-  return request("POST", "checkanswers", {
-    questionId,
-    selectedAnswer
+async function checkAnswer(id, selectedAnswer) {
+  const res = await fetch("http://localhost:8080/checkanswers", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, selectedAnswer })
   });
+
+  const data = await res.json();
+
+  if (typeof data === "boolean") return data;
+  return Boolean(data.checkAnswer);
 }
 
 export { getQuestions, checkAnswer };

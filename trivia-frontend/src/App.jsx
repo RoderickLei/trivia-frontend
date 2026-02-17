@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import { getQuestions, checkAnswer } from "./services/api";
-// import Button from "./components/Button";
+import Question from "./components/Question";
 
 function App() {
   const [questions, setQuestions] = useState([])
@@ -17,10 +15,43 @@ function App() {
     setResults({});
   }
 
+  function selectAnswer(questionId, selectedAnswer) {
+    setAnswers((prev) => ({ ...prev, [questionId]: selectedAnswer }));
+  }
+
+  async function onSubmit(e) {
+    e.preventDefault();
+
+    const newResults = {};
+    for (const q of questions) {
+      const selected = answers[q.id];
+      if (!selected) continue;
+
+      const correct = await checkAnswer(q.id, selected);
+      newResults[q.id] = correct;
+    }
+    setResults(newResults);
+  }
+
   return (
     <>
       <h1>Trivia</h1>
-      <button onClick={loadQuestions}>Load Questions</button>
+      <button type="button" onClick={loadQuestions}>Load Questions</button>
+
+      <form onSubmit={onSubmit}>
+        {questions.map((q) => (
+          <Question
+            key={q.id}
+            q={q}
+            selected={answers[q.id]}
+            result={results[q.id]}
+            onSelect={selectAnswer}
+          />
+        ))}
+        <button type="submit">
+          Check Answers
+        </button>
+      </form>
     </>
   )
 }
